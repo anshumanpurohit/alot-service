@@ -1,0 +1,412 @@
+/* external mapping begin*/
+entity AccordMapping{
+
+  id Long,
+  input String,
+  output String,
+  accrodVersion String
+
+}
+
+/* external mapping end */
+
+/* product definition begin */
+
+enum ProductLineType  {
+  HOME, PERSONALAUTO, COMMERCIALAUTO, LIFE
+}
+entity ProductLineDef{
+
+  id Long,
+  productLineType ProductLineType
+
+}
+entity CoverageDef{
+
+  id Long,
+  description String,
+  beginEffectiveDate LocalDate,
+  endEffectiveDate LocalDate,
+  state String
+
+}
+
+relationship OneToMany{
+	CoverageDef{coverageTermDef} to CoverageTermDef
+}
+
+entity CoverageTermDef{
+
+  id Long,
+  description String,
+  beginEffectiveDate LocalDate,
+  endEffectiveDate LocalDate,
+  state String
+
+}
+relationship OneToMany{
+	CoverageTermDef{covTermOptionDef} to CoverageTermOptionDef
+}
+entity CoverageTermOptionDef{
+
+  id Long,
+  description String,
+  beginEffectiveDate LocalDate,
+  endEffectiveDate LocalDate,
+  state String
+
+}
+
+
+entity DiscountDef{
+  id Long,
+  description String,
+  beginEffectiveDate LocalDate,
+  endEffectiveDate LocalDate,
+  state String
+  }
+
+/* product definition end */
+
+/* Policy execution begin */
+
+enum JobType{
+QUOTE, APPLICATION, POLICYCHANGE, CANCELLATION, REWRITE, REINSTATEMENT
+}
+entity Job{
+	id Long,
+	fixedId String
+	deleted Boolean,
+
+    jobType JobType
+}
+relationship OneToMany {
+	Job{leads} to Lead
+}
+
+entity Lead{
+	id Long,
+    requestedTime LocalDate,
+    responseTime LocalDate,
+    premimumAmount BigDecimal
+}
+relationship OneToOne{
+  Lead{carrier} to Carrier
+}
+
+entity Carrier{
+	id Long,
+	description String
+}
+
+
+
+enum PolicyContactRole{
+DRIVER, ADDITIONALINTEREST, NAMEDINSURED
+}
+
+enum CommunicationPreference{
+	PHONE, EMAIL
+}
+entity PolicyContact{
+
+	id Long,
+	fixedId String,
+	contactReferenceId String,
+	deleted Boolean,
+
+	firstName String,
+	lastName String,
+	middleInitial String,
+	dob LocalDate,
+	workPhone String,
+	homePhone String,
+	emailAddress String,
+	communicationPreference CommunicationPreference,
+	companyName String,
+	externalReferenceId String,
+
+
+}
+
+
+
+
+entity NamedInsured{
+
+	id Long,
+	fixedId String
+	deleted Boolean,
+
+
+}
+
+relationship OneToOne {
+	NamedInsured{policyContact} to PolicyContact
+}
+
+
+
+
+entity PolicyDriver{
+
+	id Long,
+	fixedId String
+
+}
+relationship OneToOne {
+	PolicyDriver{violations} to Violation
+}
+relationship OneToOne {
+	PolicyDriver{policyContact} to PolicyContact
+}
+
+relationship OneToMany{
+	PolicyDriver{vehicles} to PersonalAutoVehicle
+}
+
+entity Violation{
+	id Long,
+    externalViolationCode String,
+    description String,
+    violationOccurredDate LocalDate,
+    additionalDetails String
+}
+
+
+
+entity Policy{
+
+  id Long,
+  policyNumber String,
+  baseState String
+
+}
+relationship OneToOne{
+	Policy{productLine} to ProductLine
+}
+relationship OneToMany{
+	Policy{jobs} to Job
+}
+
+
+entity ProductLine{
+
+  id Long,
+  startEffectiveDate LocalDate,
+  endEffectiveDate LocalDate,
+
+}
+relationship OneToOne{
+	ProductLine{productLineDef} to ProductLineDef
+}
+
+relationship OneToMany{
+	ProductLine{discounts} to Discount
+}
+relationship OneToMany{
+	ProductLine{drivers} to PolicyDriver
+}
+
+relationship OneToMany{
+	ProductLine{insureds} to NamedInsured
+}
+
+
+relationship OneToMany{
+	ProductLine{vehicles} to PersonalAutoVehicle
+}
+
+
+
+relationship OneToMany{
+	ProductLine{coverages} to Coverage
+}
+
+
+entity Discount{
+	id Long,
+    amount Integer,
+}
+relationship OneToOne{
+	Discount{definition} to DiscountDef
+}
+
+entity Coverage{
+  id Long,
+  fixedId String,
+
+
+
+}
+relationship OneToOne{
+	Coverage{definition} to CoverageDef
+}
+relationship OneToMany{
+	Coverage{terms} to CoverageTerm
+}
+
+
+entity CoverageTerm{
+  id Long,
+  fixedId String
+
+}
+
+relationship OneToOne{
+	CoverageTerm{definition} to CoverageTermDef
+}
+relationship OneToMany{
+	CoverageTerm{termOptions} to CoverageTermOption
+}
+
+entity CoverageTermOption{
+  id Long,
+  fixedId String,
+
+
+
+}
+relationship OneToOne{
+	CoverageTermOption{definition} to CoverageTermOptionDef
+}
+
+
+
+
+entity PersonalAutoVehicle{
+
+  id Long,
+  fixedId String,
+  year Integer,
+  make String,
+  model String,
+  bodyStyle String,
+  symbols String
+
+}
+
+
+relationship OneToOne{
+	PersonalAutoVehicle{garageLocation} to Address
+}
+relationship OneToMany{
+	PersonalAutoVehicle{losses} to Loss
+}
+
+relationship OneToMany{
+	PersonalAutoVehicle{coverages} to Coverage
+}
+entity Loss{
+	id Long,
+    fixedId String
+    externalRefId String,
+    description String
+    lossOccurredDate LocalDate,
+    claimAmount BigDecimal
+}
+
+entity Address{
+	id Long,
+	fixedId String
+	deleted Boolean,
+
+	addressLine1 String,
+	addressLine2 String,
+	city String,
+	zipCode String,
+	zip4Code String,
+	standardized Boolean,
+	latitude String,
+	longitude String
+
+
+}
+
+entity AddressBook{
+	id Long,
+	fixedId String
+	deleted Boolean,
+
+    description String
+
+}
+
+
+
+
+
+entity ActivityPattern{
+	id Long,
+	fixedId String
+	deleted Boolean,
+
+    description String,
+    escalationDays Integer,
+    createActivityFor String
+}
+
+entity Activity{
+
+	id Long,
+	fixedId String
+	deleted Boolean,
+
+    description String
+
+}
+
+relationship OneToOne {
+	Activity{activityPattern} to ActivityPattern
+}
+
+
+
+
+
+
+entity Producer{
+
+	id Long,
+	fixedId String
+	deleted Boolean,
+
+	externalReferenceId String
+}
+
+
+relationship OneToMany {
+	Producer{addressBooks} to AddressBook
+}
+
+relationship OneToMany {
+	Producer{activities} to Activity
+}
+
+
+entity Contact{
+
+	id Long,
+	fixedId String
+
+
+	deleted Boolean,
+
+	firstName String,
+	lastName String,
+	middleInitial String,
+	dob LocalDate,
+	workPhone String,
+	homePhone String,
+	emailAddress String,
+	communicationPreference CommunicationPreference,
+	companyName String,
+	externalReferenceId String,
+
+}
+relationship OneToOne {
+	Contact{address} to Address
+}
+relationship OneToOne {
+	Contact{addressBook} to AddressBook
+}

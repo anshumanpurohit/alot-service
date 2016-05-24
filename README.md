@@ -1,4 +1,4 @@
-# alot
+# alot-service ![Codeship Status](https://codeship.com/projects/d6c33dd0-0410-0134-d566-0aae737350f2/status?branch=master)
 
 This application was generated using JHipster, you can find documentation and help at [https://jhipster.github.io](https://jhipster.github.io).
 
